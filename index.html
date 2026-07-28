@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你适合开拼豆店吗？· 创业者类型测试</title>
+<style>
+  :root{
+    --bg:#FFF8F2; --card:#FFFFFF; --ink:#3A3330; --sub:#8A7E78;
+    --peach:#FF9A76; --peach-d:#F27C54; --cream:#FFE9DC; --line:#F0E2D8;
+    --green:#7FB88E; --blue:#7FA8C9; --gold:#E0B650;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7;
+    display:flex; justify-content:center; padding:28px 16px 60px;
+  }
+  .wrap{width:100%; max-width:560px}
+  .head{text-align:center; margin-bottom:22px}
+  .head .tag{
+    display:inline-block; background:var(--cream); color:var(--peach-d);
+    font-size:13px; padding:4px 14px; border-radius:999px; font-weight:600;
+    text-decoration:none; cursor:pointer;
+  }
+  .head .tag:hover{background:var(--peach); color:#fff}
+  .head h1{font-size:23px; margin:12px 0 6px; letter-spacing:.5px}
+  .head p{color:var(--sub); font-size:14px}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:24px 22px; box-shadow:0 8px 30px rgba(220,160,120,.12);
+  }
+  .prog{height:7px; background:var(--line); border-radius:999px; overflow:hidden; margin-bottom:18px}
+  .prog > i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--peach),var(--peach-d)); transition:width .35s ease}
+  .qnum{color:var(--peach-d); font-weight:700; font-size:14px; margin-bottom:6px}
+  .qtext{font-size:18px; font-weight:600; margin-bottom:18px}
+  .opt{
+    display:block; width:100%; text-align:left; border:1.5px solid var(--line);
+    background:#FFF; border-radius:13px; padding:14px 16px; margin-bottom:11px;
+    font-size:15.5px; color:var(--ink); cursor:pointer; transition:.18s;
+  }
+  .opt:hover{border-color:var(--peach); background:var(--cream)}
+  .opt.sel{border-color:var(--peach-d); background:var(--cream); font-weight:600}
+  .btns{display:flex; gap:10px; margin-top:8px}
+  .btn{
+    flex:1; border:none; border-radius:13px; padding:13px; font-size:15.5px;
+    font-weight:700; cursor:pointer; transition:.18s; font-family:inherit;
+  }
+  .btn.primary{background:linear-gradient(90deg,var(--peach),var(--peach-d)); color:#fff}
+  .btn.primary:disabled{opacity:.4; cursor:not-allowed}
+  .btn.ghost{background:#fff; border:1.5px solid var(--line); color:var(--sub)}
+  .result{text-align:center; display:none}
+  .result .emo{font-size:54px; margin:6px 0}
+  .result .rtype{font-size:24px; font-weight:800; margin-bottom:4px}
+  .result .rslab{display:inline-block; font-size:13px; padding:3px 12px; border-radius:999px; color:#fff; margin-bottom:14px}
+  .result .rdesc{text-align:left; font-size:15px; background:var(--bg); border-radius:13px; padding:16px; margin:14px 0}
+  .result .rdesc b{color:var(--peach-d)}
+  .result .rcta{font-size:13.5px; color:var(--sub); margin-top:14px; line-height:1.6}
+  .reslink{display:block; text-decoration:none; color:inherit; cursor:pointer}
+  .reslink:hover .rtype{color:var(--peach-d)}
+  .result .rcta a{color:var(--peach-d); text-decoration:none; font-weight:700}
+  .foot{text-align:center; color:#BBB0A8; font-size:12px; margin-top:26px; line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <a class="tag" href="https://www.xiaohongshu.com/user/profile/5dd0a66d0000000001000c4a" target="_blank">柚子の拼豆创业复盘 · 自测</a>
+    <h1>你适合开拼豆店吗？</h1>
+    <p>20 题，3 分钟，直接告诉你属于哪种拼豆店创业类型</p>
+  </div>
+
+  <div class="card" id="quiz">
+    <div class="prog"><i id="bar"></i></div>
+    <div id="panel"></div>
+    <div class="btns" id="nav">
+      <button class="btn ghost" id="prevBtn" style="display:none" onclick="prev()">上一题</button>
+      <button class="btn primary" id="nextBtn" disabled onclick="next()">下一题</button>
+    </div>
+  </div>
+
+  <div class="card result" id="res">
+    <a class="reslink" href="https://www.xiaohongshu.com/user/profile/5dd0a66d0000000001000c4a" target="_blank">
+      <div class="emo" id="rEmo">🌿</div>
+      <div class="rtype" id="rType"></div>
+      <span class="rslab" id="rLab"></span>
+      <div class="rdesc" id="rDesc"></div>
+      <div class="rcta">
+        这份测试整理自柚子用 5 万存款开拼豆店的完整复盘。<br>
+        关注小红书 @柚子的拼豆手工创业复盘，看更多真实开店判断方法 →
+      </div>
+    </a>
+    <div class="btns"><button class="btn primary" onclick="restart()">重新测一次</button></div>
+  </div>
+
+  <div class="foot">本测试仅供创业前自我对照，不构成投资建议 · 数据来自真实开店经历</div>
+</div>
+
+<script>
+const QS = [
+  {q:'你最早想开拼豆店，是因为什么？', o:[
+    {t:'我就是喜欢做手工，觉得很治愈', k:'A'},
+    {t:'想要一个属于自己的、舒服的小空间', k:'B'},
+    {t:'觉得这是个能做成生意的机会', k:'C'},
+    {t:'被种草了，觉得好像挺好玩', k:'D'}]},
+  {q:'如果开店前三个月都不赚钱，你的感觉是？', o:[
+    {t:'能接受，本来就是圆梦', k:'A'},
+    {t:'有点慌，但相信慢慢会好', k:'B'},
+    {t:'早就算过这笔账，有预案', k:'C'},
+    {t:'完全没想到会不赚钱', k:'D'}]},
+  {q:'你脑子里“开店后一天怎么过”，更像？', o:[
+    {t:'安静地做作品、琢磨新品', k:'A'},
+    {t:'和来玩的人聊天、搞氛围', k:'B'},
+    {t:'看数据、调价格、想怎么获客', k:'C'},
+    {t:'还没仔细想过', k:'D'}]},
+  {q:'你觉得你开店最大的底气是？', o:[
+    {t:'我审美在线，东西做得好看', k:'A'},
+    {t:'我性格好，会让人放松', k:'B'},
+    {t:'我会做生意 / 有资源 / 懂内容', k:'C'},
+    {t:'暂时说不上来', k:'D'}]},
+  {q:'你的第一批客人，你打算从哪来？', o:[
+    {t:'朋友同好，口口相传', k:'A'},
+    {t:'小红书慢慢发，攒一波人', k:'B'},
+    {t:'已经有明确打法（内容 / 美团 / 私域）', k:'C'},
+    {t:'店开起来自然有人吧', k:'D'}]},
+  {q:'采购、卫生、库存、客户沟通、天天重复——这些事？', o:[
+    {t:'有点烦，但为了喜欢能忍', k:'A'},
+    {t:'不排斥，就当和人打交道', k:'B'},
+    {t:'本来就是经营，得系统做', k:'C'},
+    {t:'完全没想到要做这些', k:'D'}]},
+  {q:'假如隔壁突然开了 3 家拼豆店，你？', o:[
+    {t:'不怕，我做的更特别', k:'A'},
+    {t:'把体验做细，留住人', k:'B'},
+    {t:'立刻研究差异化和引流', k:'C'},
+    {t:'焦虑，不知道怎么办', k:'D'}]},
+  {q:'你准备为这家店投入多少“看不见的时间”？', o:[
+    {t:'周末业余玩玩就好', k:'B'},
+    {t:'全职干，起伏也认了', k:'C'},
+    {t:'看心情，没概念', k:'D'},
+    {t:'先试试，不行就收', k:'A'}]},
+  {q:'你更想“卖”的是？', o:[
+    {t:'我的作品、手工本身', k:'A'},
+    {t:'一种放松治愈的体验', k:'B'},
+    {t:'一套能复利的商业模式', k:'C'},
+    {t:'还没想清楚', k:'D'}]},
+  {q:'你算过“每天最少赚多少才不亏”吗？', o:[
+    {t:'算过，门儿清', k:'C'},
+    {t:'大概有数', k:'A'},
+    {t:'没算过', k:'D'},
+    {t:'凭感觉应该能赚', k:'B'}]},
+  {q:'如果一年后店没起色，你的退路？', o:[
+    {t:'调整方向或换个方式继续试', k:'C'},
+    {t:'关掉，就当一段经历', k:'A'},
+    {t:'没想过', k:'D'},
+    {t:'不敢想，应该不会吧', k:'D'}]},
+  {q:'你现在的状态更接近？', o:[
+    {t:'手工爱好者，想圆梦', k:'A'},
+    {t:'想有个小事业但轻松点', k:'B'},
+    {t:'认真想做门能赚钱的生意', k:'C'},
+    {t:'跟风，觉得好玩', k:'D'}]},
+  {q:'你会因为“自己喜欢”就决定店里的东西吗？', o:[
+    {t:'会啊，我喜欢的一般别人也喜欢', k:'A'},
+    {t:'会参考大家，但凭感觉多', k:'B'},
+    {t:'不会，一切看用户和数据', k:'C'},
+    {t:'没意识到这问题', k:'D'}]},
+  {q:'让别人知道你要开店，你的态度是？', o:[
+    {t:'先低调，怕被抄', k:'A'},
+    {t:'顺其自然，有人问再说', k:'B'},
+    {t:'越早宣传越好，提前攒客', k:'C'},
+    {t:'没想过要宣传', k:'D'}]},
+  {q:'你愿意在签合同后、装修前就开始发内容吗？', o:[
+    {t:'没必要吧，店好了再发', k:'A'},
+    {t:'可以试试，但不急', k:'B'},
+    {t:'必须的，内容要先发酵', k:'C'},
+    {t:'不知道要发内容', k:'D'}]},
+  {q:'你觉得“开店”最难的环节是？', o:[
+    {t:'把作品做好看', k:'A'},
+    {t:'营造舒服的氛围', k:'B'},
+    {t:'让第一个客人愿意进门', k:'C'},
+    {t:'没想过难点', k:'D'}]},
+  {q:'关于定价，你的思路是？', o:[
+    {t:'参考别人，差不多就行', k:'A'},
+    {t:'看感觉，别太贵就好', k:'B'},
+    {t:'算成本 + 看市场 + 留利润', k:'C'},
+    {t:'还没想', k:'D'}]},
+  {q:'你能接受“开店不是想象中那种生活”吗？', o:[
+    {t:'能，本来就是圆梦不在乎', k:'A'},
+    {t:'希望能尽量舒服', k:'B'},
+    {t:'接受，早有心理准备', k:'C'},
+    {t:'想象的就是美好的，接受不了', k:'D'}]},
+  {q:'你更想服务哪类人？', o:[
+    {t:'和我一样喜欢手工的人', k:'A'},
+    {t:'想放松、约会、社交的人', k:'B'},
+    {t:'愿意为体验 / 品质付费的人', k:'C'},
+    {t:'还没想清楚', k:'D'}]},
+  {q:'如果只能给犹豫的人一句话，你会说？', o:[
+    {t:'喜欢就冲，别想太多', k:'A'},
+    {t:'先体验，慢慢来', k:'B'},
+    {t:'先想清楚用户和流量再动', k:'C'},
+    {t:'开店好像挺容易的吧', k:'D'}]}
+];
+
+const DESC = {
+  A:{emo:'💭', name:'梦想体验型', lab:'热爱驱动', color:'var(--green)',
+     d:'你的典型回答是：因为喜欢手工、想拥有自己的小店，但对经营压力预估不足。<br><br><b>优势：</b>有热情、有创造力，这是把店做起来的原始动力。<br><br><b>风险：</b>容易把"兴趣和经营"混在一起——你喜欢做，不等于有人愿意付钱。<br><br><b>建议：</b>先低成本验证。别一上来签长租、重装修，用内容和轻量体验先把"有没有人真的需要"试出来。'},
+  B:{emo:'🌱', name:'副业探索型', lab:'轻量试水', color:'var(--blue)',
+     d:'你的典型回答是：想利用兴趣赚钱，但不想投入太多。<br><br><b>优势：</b>风险意识强，不盲目 all-in。<br><br><b>风险：</b>时间投入不足，容易停在"想"的阶段，迟迟没结果。<br><br><b>建议：</b>先线上测试。用小红书 / 社群轻量跑一轮，验证有没有人愿意为你的内容或产品买单。'},
+  C:{emo:'📊', name:'商业验证型', lab:'理性经营', color:'var(--peach-d)',
+     d:'你的典型回答是：会研究用户、会算成本、会关注获客。<br><br><b>优势：</b>经营意识强，这是手作店最稀缺的能力。<br><br><b>风险：</b>可能忽略体验打造——数据和价格对了，但客人留不下来。<br><br><b>建议：</b>建立模型后执行。先把"流量—转化—复购"的小模型跑通，再加重投入。'},
+  D:{emo:'⚠️', name:'冲动进入型', lab:'先别急', color:'var(--gold)',
+     d:'你的典型回答是：看别人赚钱、觉得投入不高、没想过客源。<br><br><b>风险：</b>开店后容易被现实打击——客流、成本、复购，哪一个没想清楚都是坑。<br><br><b>建议：</b>先不要签合同。把"客人从哪来、愿付多少、凭什么选你"想清楚，再动真格的。'}
+};
+
+let i=0, sel=[], score={A:0,B:0,C:0,D:0};
+const panel=document.getElementById('panel'), bar=document.getElementById('bar');
+const nextBtn=document.getElementById('nextBtn'), prevBtn=document.getElementById('prevBtn');
+
+function render(){
+  const q=QS[i];
+  bar.style.width=((i)/QS.length*100)+'%';
+  panel.innerHTML=`<div class="qnum">第 ${i+1} / ${QS.length} 题</div><div class="qtext">${q.q}</div>`+
+    q.o.map((o,idx)=>`<button class="opt ${sel[i]===idx?'sel':''}" onclick="choose(${idx})">${o.t}</button>`).join('');
+  prevBtn.style.display = i>0 ? 'block':'none';
+  nextBtn.disabled = sel[i]===undefined;
+  nextBtn.textContent = i===QS.length-1 ? '查看结果' : '下一题';
+}
+function choose(idx){ sel[i]=idx; render(); }
+function next(){
+  if(sel[i]===undefined) return;
+  if(i===QS.length-1){ finish(); return; }
+  i++; render();
+}
+function prev(){ if(i>0){ i--; render(); } }
+function finish(){
+  score={A:0,B:0,C:0,D:0};
+  sel.forEach((idx,qi)=>{ score[QS[qi].o[idx].k]++; });
+  const order=['C','A','B','D'];
+  let best='D', bestV=-1;
+  order.forEach(k=>{ if(score[k]>bestV){ bestV=score[k]; best=k; } });
+  const d=DESC[best];
+  document.getElementById('quiz').style.display='none';
+  const r=document.getElementById('res'); r.style.display='block';
+  document.getElementById('rEmo').textContent=d.emo;
+  document.getElementById('rType').textContent=d.name;
+  const lab=document.getElementById('rLab'); lab.textContent=d.lab; lab.style.background=d.color;
+  document.getElementById('rDesc').innerHTML=d.d;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function restart(){
+  i=0; sel=[]; score={A:0,B:0,C:0,D:0};
+  document.getElementById('res').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+render();
+</script>
+</body>
+</html>
