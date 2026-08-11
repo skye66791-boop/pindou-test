@@ -49,13 +49,23 @@
   section h2 .n{background:var(--soft);color:#B5651D;border-radius:8px;width:26px;height:26px;
                 display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto}
 
-  /* 资料包包含 —— 产品卡片 */
-  .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:10px}
+  /* 资料包包含 —— 卡片 */
   .feature-card{background:#FFFBF8;border:1px solid var(--line);border-radius:14px;padding:16px;transition:transform .15s}
   .feature-card:active{transform:scale(.98)}
   .feature-card h3{font-size:15px;color:#B5651D;margin-bottom:5px;display:flex;align-items:center;gap:8px}
   .feature-card h3 .dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--deep)}
   .feature-card p{font-size:12.5px;color:var(--sub);line-height:1.65}
+
+  /* 资料包包含 —— 选项卡 */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .tab{flex:1 1 auto;min-width:84px;padding:9px 6px;border:1px solid var(--line);background:#FFFBF8;
+       border-radius:10px;font-size:13px;font-weight:600;color:#9A4E12;cursor:pointer;transition:.15s}
+  .tab:active{transform:scale(.97)}
+  .tab.active{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .tab-panels{margin-top:14px}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
   /* 资料下载 —— 跑马灯 */
   .marquee-wrap{overflow:hidden;background:transparent;padding:9px 0;margin-bottom:14px}
@@ -116,7 +126,6 @@
   .loglist li{display:flex;align-items:flex-start;gap:2px}
 
   @media (max-width:560px){
-    .feature-grid{grid-template-columns:1fr}
     .diag-flow{grid-template-columns:1fr}
   }
 </style>
@@ -137,35 +146,59 @@
 <!-- 主体 -->
 <div id="content" class="wrap">
   <header class="hero">
-    <img src="资料包产品首页图_19.9预售.png" alt="柚子的拼豆开店资料包">
+    <img src="资料包产品首页图_24.9限时优惠.png" alt="柚子的拼豆开店资料包">
     <h1>柚子的拼豆开店资料包</h1>
-    <div class="price"><b>¥19.9</b><s>原价 ¥29.9</s> · 预售 5 天</div>
-    <span class="badge">最晚 8 月 6 日前交付 · 首批永久更新</span>
+    <div class="price"><b>¥24.9</b><s>原价 ¥29.9</s> · 限时优惠</div>
+    <span class="badge">一次购买 · 永久持续更新</span>
     <div class="sell">帮你迅速进入营业状态，比同期拼豆店更快攒下第一批用户。</div>
   </header>
 
   <section>
     <h2><span class="n">✓</span>资料包包含</h2>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <h3><span class="dot"></span>开店采购清单</h3>
-        <p>按品类分优先级，先买能开张的，少花一笔冤枉钱。</p>
+    <div class="tabs" id="pkgTabs">
+      <button class="tab active" data-i="0">① 采购清单</button>
+      <button class="tab" data-i="1">② 配件链接</button>
+      <button class="tab" data-i="2">③ 豆子收纳</button>
+      <button class="tab" data-i="3">④ 布局教程</button>
+      <button class="tab" data-i="4">⑤ 筹备流程</button>
+      <button class="tab" data-i="5">⑥ 进货管理</button>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel active">
+        <div class="feature-card">
+          <h3><span class="dot"></span>① 开店采购必买核对清单</h3>
+          <p><b>怕漏买、怕乱买？</b>新手最怕两件事：漏了开业当天抓瞎，乱买一堆用不上的占库存、压现金流。这份基于柚子真实 145 项采购记录，做成可勾选清单、按功能分组，你拿着逐条打勾，一眼看出还差什么、哪些能先不买，把钱花在能开张的地方。</p>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3><span class="dot"></span>实际购买过的材料链接</h3>
-        <p>柚子自己下单验证过的渠道，省掉试错和踩坑时间。</p>
+      <div class="tab-panel">
+        <div class="feature-card">
+          <h3><span class="dot"></span>② 配件采购链接</h3>
+          <p><b>找不到靠谱货源？</b>钥匙扣、夜灯、首饰配件这些，最头疼"比价累、买回来规格还对不上"。这份直接给你柚子自己下过单、验证过的采购链接，跳过全网试错，避免买错型号白花钱。</p>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3><span class="dot"></span>豆子采购与收纳方案</h3>
-        <p>常用色号清单 + 收纳方案，避免买多、买错、找不着。</p>
+      <div class="tab-panel">
+        <div class="feature-card">
+          <h3><span class="dot"></span>③ 豆子采购与收纳</h3>
+          <p><b>豆子买错囤错？</b>豆子是拼豆最大头的持续成本，新手最容易"没寄样就囤、买错材质（有甲醛）、收纳乱成一团找不到色号"。这份讲清怎么选（寄样/材质/EVA）、怎么收（5 种方案+规格型号），帮你避开买错、囤错、找不着的坑。</p>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3><span class="dot"></span>店铺布局参考</h3>
-        <p>用酷家乐画出自己店铺的平面图，动线先跑通再装修。</p>
+      <div class="tab-panel">
+        <div class="feature-card">
+          <h3><span class="dot"></span>④ 店铺布局教程</h3>
+          <p><b>装修凭感觉返工？</b>新手最容易"等开业才发现桌子不够坐、动线乱、拍照不好看、灯光偏黄"。这份用酷家乐教程让你提前量房画出布局，先跑通动线和体验再装修，少在硬装上走弯路、省真金白银。</p>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3><span class="dot"></span>经营数据统计模板</h3>
-        <p>记账、记内容、记客户，让数据替你决定下一步。</p>
+      <div class="tab-panel">
+        <div class="feature-card">
+          <h3><span class="dot"></span>⑤ 开店筹备流程</h3>
+          <p><b>顺序搞反最致命？</b>还没验证需求就砸钱签约、装修、囤货，是开店最大的坑。这份是 5 步筹备流程图，先想清定位、先验证再投入，让每一笔钱都花得不冤。</p>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="feature-card">
+          <h3><span class="dot"></span>⑥ 拼豆进货管理表</h3>
+          <p><b>库存糊住脑子？</b>开店后最容易"进了什么、卖了多少、哪个色号快没了全靠记"，结果要么断货掉单、要么积压占钱。这份是现成的进货/色号管理表，进多少、卖多少心里有数，补货不慌。</p>
+        </div>
       </div>
     </div>
   </section>
@@ -280,6 +313,19 @@
       alert("已复制：" + WECHAT_ID);
     });
   }
+
+  // 资料包包含 —— 选项卡切换
+  const tabs = document.querySelectorAll("#pkgTabs .tab");
+  const panels = document.querySelectorAll(".tab-panel");
+  tabs.forEach(function(t){
+    t.addEventListener("click", function(){
+      const i = +t.dataset.i;
+      tabs.forEach(function(x){ x.classList.remove("active"); });
+      panels.forEach(function(p){ p.classList.remove("active"); });
+      t.classList.add("active");
+      panels[i].classList.add("active");
+    });
+  });
 </script>
 </body>
 </html>
