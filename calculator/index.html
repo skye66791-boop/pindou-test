@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>店铺经营存续评估 · 止损 · 柚子</title>
+<style>
+  :root{
+    --cream:#FFF7EC; --orange:#F39E35; --orange-d:#BA7517; --orange-l:#FAEEDA;
+    --brown:#7A4821; --brown-l:#9A8C7A; --green:#639922; --green-d:#3B6D11; --green-l:#EAF3DE;
+    --red:#A32D2D; --red-l:#FCEBEB; --grey:#5F5E5A; --line:#F0E2CC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"PingFang SC","STHeiti",sans-serif;background:linear-gradient(165deg,#FFFDF8 0%, #FBF1E0 55%, #F6E8D0 100%);background-attachment:fixed;color:var(--brown);line-height:1.6;padding:22px 14px 60px;}
+  .wrap{max-width:680px;margin:0 auto;position:relative;}
+  .blob{position:absolute;width:140px;height:140px;border-radius:50%;background:var(--orange-l);opacity:.45;z-index:-1;filter:blur(2px);}
+  .blob2{position:absolute;width:180px;height:180px;border-radius:50%;background:var(--green-l);opacity:.4;z-index:-1;filter:blur(6px);}
+  header{text-align:center;margin-bottom:14px;}
+  header .brand{display:inline-block;font-size:12px;font-weight:700;color:var(--orange-d);background:#fff;border:1px solid var(--orange);border-radius:20px;padding:3px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(243,158,53,.18);}
+  header h1{font-size:23px;font-weight:800;letter-spacing:.5px;background:linear-gradient(90deg,var(--brown),var(--orange-d));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  header p{font-size:13px;color:var(--brown-l);margin-top:6px;}
+  .card{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:14px 0;box-shadow:0 6px 20px rgba(122,72,33,.07);}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--green));}
+  .card h2{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block;flex:none;}
+  .sub{font-size:12px;color:var(--brown-l);margin-bottom:10px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .field label{font-size:12px;color:var(--brown);display:block;margin-bottom:4px;}
+  .field input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;color:var(--brown);background:var(--cream);outline:none;transition:border-color .15s,box-shadow .15s;}
+  .field input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(243,158,53,.15);}
+  .sum{font-size:12px;color:var(--orange-d);margin-top:8px;text-align:right;font-weight:600;}
+  .month-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .month-row .m-label{font-size:12px;width:48px;color:var(--brown-l);flex:none;}
+  .month-row input{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;background:var(--cream);outline:none;}
+  .month-row input:focus{border-color:var(--orange);}
+  .month-row .m-del{border:none;background:var(--red-l);color:var(--red);border-radius:8px;width:28px;height:28px;font-size:16px;cursor:pointer;flex:none;}
+  .add-btn{border:1px dashed var(--orange);background:#fff;color:var(--orange-d);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer;width:100%;margin-top:4px;transition:background .15s;}
+  .add-btn:hover{background:var(--orange-l);}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+  .stat{background:var(--cream);border-radius:12px;padding:12px;text-align:center;border:1px solid var(--line);}
+  .stat .k{font-size:12px;color:var(--brown-l);}
+  .stat .v{font-size:19px;font-weight:700;margin-top:2px;}
+  .v.pos{color:var(--green);} .v.neg{color:var(--red);} .v.mid{color:var(--orange-d);}
+  .chart-title{font-size:13px;font-weight:600;margin:10px 0 4px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .hint{font-size:11px;color:var(--brown-l);font-weight:400;}
+  #chartWrap{position:relative;}
+  #tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--orange);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--brown);box-shadow:0 4px 12px rgba(122,72,33,.12);opacity:0;transition:opacity .12s;z-index:5;min-width:120px;}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--brown-l);margin-top:6px;}
+  .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:4px;vertical-align:middle;}
+  .verdict{border-radius:14px;padding:16px;margin-top:14px;box-shadow:0 4px 14px rgba(122,72,33,.06);}
+  .verdict.grow{background:var(--green-l);border:1px solid var(--green);}
+  .verdict.save{background:var(--orange-l);border:1px solid var(--orange);}
+  .verdict.stop{background:var(--red-l);border:1px solid var(--red);}
+  .verdict h3{font-size:16px;font-weight:700;margin-bottom:6px;}
+  .verdict.grow h3{color:var(--green-d);} .verdict.save h3{color:var(--orange-d);} .verdict.stop h3{color:var(--red);}
+  .verdict p{font-size:13px;}
+  .report{margin-top:14px;background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:14px;}
+  .report h3{font-size:14px;font-weight:700;margin-bottom:8px;}
+  .step{font-size:13px;margin-bottom:8px;padding-left:4px;border-left:3px solid var(--orange);padding:4px 0 4px 10px;}
+  .bench{font-size:12px;color:var(--brown-l);background:#fff;border:1px dashed var(--line);border-radius:10px;padding:10px;margin-top:12px;}
+  .footer-links{text-align:center;margin-top:16px;}
+  .footer-links a{display:inline-block;background:var(--orange);color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:10px 18px;border-radius:22px;box-shadow:0 2px 8px rgba(243,158,53,.3);}
+  .footer-links a:hover{background:var(--orange-d);}
+
+  /* 两栏布局：左输入 · 右结果 */
+  .layout{display:grid;grid-template-columns:1fr;gap:14px;align-items:start;}
+  @media(min-width:780px){
+    .wrap{max-width:1000px;}
+    .layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;}
+    .col-output{position:relative;padding-right:4px;}
+  }
+
+  /* 产品轮播图 */
+  .car-wrap{margin-top:22px;}
+  .car-head{display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;color:var(--brown);font-weight:800;margin-bottom:12px;}
+  .car-head .dotg{width:6px;height:6px;border-radius:50%;background:var(--orange);}
+  .carousel{position:relative;max-width:100%;}
+  .car-track{position:relative;overflow:hidden;border-radius:18px;background:#fff;border:1px solid var(--orange);box-shadow:0 8px 24px rgba(122,72,33,.08);}
+  .car-slide{display:none;box-sizing:border-box;padding:0;overflow:hidden;background:linear-gradient(180deg,#fffdf8 0%, var(--cream) 100%);border-radius:18px;}
+  .car-slide.is-active{display:block;}
+  .car-img{width:100%;height:172px;object-fit:cover;display:block;}
+  .car-inner{padding:15px 18px 18px;}
+  .car-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .car-who{font-size:11.5px;color:var(--green-d);font-weight:600;margin-bottom:3px;}
+  .car-title{font-size:17px;font-weight:800;color:var(--brown-d);}
+  .car-price{font-size:22px;font-weight:900;color:var(--orange-d);white-space:nowrap;}
+  .car-price small{font-size:12px;font-weight:600;color:var(--brown-l);}
+  .car-tag{display:inline-block;font-size:11px;color:#1A8C00;background:#eafbe4;border:1px solid #b6e6a8;border-radius:20px;padding:2px 9px;margin:10px 0 12px;}
+  .car-body{margin-top:4px;}
+  .car-copy{font-size:13px;line-height:1.78;color:var(--brown);margin:10px 0 4px;}
+  .car-sec{margin-bottom:10px;}
+  .car-sec .lab{display:inline-block;font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:1px 8px;margin-bottom:3px;}
+  .car-sec .lab.pain{background:var(--red);}
+  .car-sec .lab.val{background:var(--orange);}
+  .car-sec .lab.out{background:var(--green);}
+  .car-sec p{font-size:12.5px;line-height:1.7;color:var(--brown);margin:0;}
+  .car-sec p b{color:var(--orange-d);}
+  .car-cta{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;background:#fff;border:1px dashed #2DC100;border-radius:12px;padding:11px;font-size:14px;color:var(--brown);text-decoration:none;transition:background .15s;}
+  .car-cta:hover{background:#f3fbf0;}
+  .car-cta b{color:#1A8C00;font-size:15px;letter-spacing:.5px;}
+  .car-arrows{position:absolute;top:46%;left:0;right:0;display:flex;justify-content:space-between;transform:translateY(-50%);pointer-events:none;}
+  .car-arrows button{pointer-events:auto;border:none;background:rgba(122,72,33,.82);color:#fff;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .car-arrows button:hover{background:var(--brown-d);}
+  .car-dots{display:flex;justify-content:center;gap:7px;margin-top:10px;}
+  .car-dots .d{width:8px;height:8px;border-radius:50%;background:#e3d3bd;cursor:pointer;transition:background .2s;}
+  .car-dots .d.on{background:var(--orange);width:18px;border-radius:5px;}
+  footer{text-align:center;font-size:11px;color:var(--brown-l);margin-top:24px;}
+
+  /* 小字备注按钮（图表 / 复盘右下角） */
+  .mini-note{display:inline-block;font-size:11px;color:var(--brown-l);background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px 10px;cursor:pointer;transition:all .15s;font-family:inherit;}
+  .mini-note:hover{color:var(--orange-d);border-color:var(--orange);background:var(--orange-l);}
+  .mini-note-row{text-align:right;margin-top:8px;}
+  #chartWrap .mini-note{position:absolute;right:6px;bottom:6px;z-index:4;box-shadow:0 1px 5px rgba(122,72,33,.12);}
+
+  /* 弹窗 */
+  .modal{position:fixed;inset:0;display:none;z-index:60;align-items:center;justify-content:center;padding:20px;}
+  .modal.show{display:flex;}
+  .modal-mask{position:absolute;inset:0;background:rgba(60,40,20,.45);}
+  .modal-box{position:relative;background:#fff;border-radius:18px;max-width:440px;width:100%;max-height:82vh;overflow:auto;padding:22px 20px;box-shadow:0 12px 40px rgba(0,0,0,.25);}
+  .modal-box h4{font-size:15px;font-weight:800;color:var(--brown-d);margin-bottom:10px;}
+  .modal-box p{font-size:13px;line-height:1.85;color:var(--brown);margin-bottom:10px;}
+  .modal-box p b{color:var(--orange-d);}
+  .modal-close{position:absolute;top:10px;right:12px;border:none;background:var(--cream);color:var(--brown);width:30px;height:30px;border-radius:50%;font-size:18px;line-height:1;cursor:pointer;transition:background .15s;}
+  .modal-close:hover{background:var(--orange-l);}
+</style>
+</head>
+<body>
+<div class="blob" style="top:-30px;left:-40px;"></div>
+<div class="blob2" style="top:160px;right:-60px;"></div>
+<div class="wrap">
+  <header>
+    <div class="brand">🍊 柚子 · 真实开过店的人</div>
+    <h1>店铺经营存续评估 · 止损</h1>
+    <p>关键不是算"赚没赚"，而是算"达没达到你的预期"——手把手带你捋清店铺的现状</p>
+  </header>
+
+  <div class="layout">
+    <!-- 左：输入区 -->
+    <div class="col-input">
+      <div class="card">
+        <h2><span class="dot"></span>① 初始总投入（一次性花出去的）</h2>
+        <div class="grid">
+          <div class="field"><label>店铺转让 / 加盟费</label><input id="i_transfer" type="number" value="20000" min="0"></div>
+          <div class="field"><label>装修费</label><input id="i_deco" type="number" value="15000" min="0"></div>
+          <div class="field"><label>设备与家具</label><input id="i_equip" type="number" value="12000" min="0"></div>
+          <div class="field"><label>首批物料 / 库存</label><input id="i_stock" type="number" value="8000" min="0"></div>
+          <div class="field"><label>房租押金</label><input id="i_deposit" type="number" value="6000" min="0"></div>
+          <div class="field"><label>备用金（可追加，选填）</label><input id="i_reserve" type="number" value="10000" min="0"></div>
+        </div>
+        <div class="sum">初始总投入合计：¥<span id="sum_initial">0</span></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>② 你的个人预期（填一填，实时看变化）</h2>
+        <div class="grid">
+          <div class="field"><label>期望月盈利：每月净赚多少你才觉得"值"</label><input id="expected" type="number" value="5000" min="0"></div>
+          <div class="field"><label>可接受最大亏损：累计亏到多少你就停</label><input id="maxloss" type="number" value="50000" min="0"></div>
+        </div>
+        <div class="grid" style="margin-top:10px;">
+          <div class="field"><label>自己打工月收入（机会成本）</label><input id="wage" type="number" value="6000" min="0"></div>
+          <div class="field"><label>每月投入工时（算时薪）</label><input id="hours" type="number" value="200" min="0"></div>
+        </div>
+        <div class="sub" style="margin-top:8px;">这四个数字决定"继续干"到底划不划算——光看店里赚多少，会漏掉你本可以打工赚的钱。</div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>③ 实际经营记录（每月净盈亏）</h2>
+        <div class="sub">一笔一笔记下每个月实际赚/亏多少，工具会帮你数"达标几个月"。可增删。</div>
+        <div id="monthList"></div>
+        <button class="add-btn" onclick="addMonth()">＋ 添加一个月</button>
+      </div>
+    </div>
+
+    <!-- 右：结果区 -->
+    <div class="col-output">
+      <div id="result">
+        <div class="card">
+          <h2><span class="dot"></span>④ 关键数字</h2>
+          <div class="stats">
+            <div class="stat"><div class="k">累计盈亏</div><div class="v" id="o_cum">—</div></div>
+            <div class="stat"><div class="k">平均月盈亏</div><div class="v" id="o_avg">—</div></div>
+            <div class="stat"><div class="k">达标月数 / 总月数</div><div class="v" id="o_met">—</div></div>
+            <div class="stat"><div class="k" id="k_four">回本还需</div><div class="v" id="o_four">—</div></div>
+          </div>
+
+          <div class="chart-title"><span>未来 24 个月累计现金流</span><span class="hint">悬停看每月详情 · 绿区已回本 / 红区破止损线</span></div>
+          <div id="chartWrap">
+            <div id="chart"></div>
+            <div id="tip"></div>
+            <button type="button" class="mini-note" onclick="openModal('lines')">这两条线是怎么算出来的 ›</button>
+          </div>
+          <div class="legend">
+            <span><i style="background:#F39E35"></i>实际累计</span>
+            <span><i style="background:#639922"></i>期望轨迹（若每月达标）</span>
+            <span><i style="background:#9A8C7A"></i>回本线 0</span>
+            <span><i style="background:#A32D2D"></i>你的止损线</span>
+          </div>
+        </div>
+
+        <div id="verdict" class="verdict">
+          <h3 id="v_title">—</h3>
+          <p id="v_text">—</p>
+        </div>
+
+        <div class="report">
+          <h3>一步步带你复盘</h3>
+          <div id="report"></div>
+          <div class="mini-note-row"><button type="button" class="mini-note" onclick="openModal('industry')">行业参考 ›</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部：产品宣传轮播 -->
+  <div class="car-wrap">
+    <div class="car-head"><span class="dotg"></span>柚子还可以做什么？这几样能直接帮你<span class="dotg"></span></div>
+    <div class="carousel">
+      <div class="car-track" id="carTrack">
+
+        <div class="car-slide is-active">
+          <img class="car-img" src="car_transfer.png" alt="转店交接场景">
+          <div class="car-inner">
+            <div class="car-top">
+              <div>
+                <div class="car-who">适合：算出「该止损」、已决心转店的人</div>
+                <div class="car-title">把店交出去的那一刻，别留后患</div>
+              </div>
+              <div class="car-price">¥15 <small>转店加速包</small></div>
+            </div>
+            <div class="car-tag">含2套转店方案及话术 · 合同模板及注意事项 · 转店20项必要核对清单</div>
+            <p class="car-copy">决定转了，最怕谈价时没底气、签字时埋雷。这套话术和合同模板，是我自己转店踩完坑才磨出来的，一条条替你想清楚。照着填，体面脱手，不扯皮。</p>
+            <a class="car-cta" href="#"><svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#2DC100" d="M18 8C10.8 8 5 13.1 5 19.4c0 3.9 2.2 7.3 5.6 9.5L9 32l4.6-2.4c1.5.4 3.1.7 4.8.7.4 0 .8 0 1.2-.1-.3-.9-.5-1.8-.5-2.8 0-6.1 5.6-11 12.5-11 .4 0 .9 0 1.3.1C31.9 12.4 25.9 8 18 8Zm-5 9.2a1.6 1.6 0 110-3.2 1.6 1.6 0 010 3.2Zm10 0a1.6 1.6 0 110-3.2 1.6 1.6 0 010 3.2Z"/><path fill="#2DC100" d="M43 29.6c0-5.4-5-9.8-11.2-9.8-6.3 0-11.4 4.4-11.4 9.8 0 5.4 5.1 9.8 11.4 9.8 1.4 0 2.7-.2 3.9-.6L38 40l-1-2.4c3-.1 5.3-1.9 6.8-4 .2-.2.3-.5.4-.7.2-.5.3-1 .3-1.3Zm-15.1-2.4a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6Zm7.7 0a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6Z"/></svg>加<b>youziye68</b> 获取</a>
+          </div>
+        </div>
+
+        <div class="car-slide">
+          <img class="car-img" src="car_diagnose.png" alt="账号诊断场景">
+          <div class="car-inner">
+            <div class="car-top">
+              <div>
+                <div class="car-who">适合：算出「还能自救」、但店里就是没人来</div>
+                <div class="car-title">东西不差，怎么就是没人来？</div>
+              </div>
+              <div class="car-price">¥99<small>/次 获客诊断</small></div>
+            </div>
+            <div class="car-tag">小红书/抖音/美团账号诊断 · 问题归因 · 给到3个可持续行动可落地的针对性方案</div>
+            <p class="car-copy">小红书发了没人看、美团花钱推广了也没用——你不是不努力，是不知道有效获客的方法。柚子已帮30+店铺老板做线上诊断，帮助店铺认清优势，持续有效的线上获客。</p>
+            <a class="car-cta" href="#"><svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#2DC100" d="M18 8C10.8 8 5 13.1 5 19.4c0 3.9 2.2 7.3 5.6 9.5L9 32l4.6-2.4c1.5.4 3.1.7 4.8.7.4 0 .8 0 1.2-.1-.3-.9-.5-1.8-.5-2.8 0-6.1 5.6-11 12.5-11 .4 0 .9 0 1.3.1C31.9 12.4 25.9 8 18 8Zm-5 9.2a1.6 1.6 0 110-3.2 1.6 1.6 0 010 3.2Zm10 0a1.6 1.6 0 110-3.2 1.6 1.6 0 010 3.2Z"/><path fill="#2DC100" d="M43 29.6c0-5.4-5-9.8-11.2-9.8-6.3 0-11.4 4.4-11.4 9.8 0 5.4 5.1 9.8 11.4 9.8 1.4 0 2.7-.2 3.9-.6L38 40l-1-2.4c3-.1 5.3-1.9 6.8-4 .2-.2.3-.5.4-.7.2-.5.3-1 .3-1.3Zm-15.1-2.4a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6Zm7.7 0a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6Z"/></svg>加<b>youziye68</b> 预约</a>
+          </div>
+        </div>
+
+        <div class="car-slide">
+          <img class="car-img" src="car_accel.png" alt="转让加速场景">
+          <div class="car-inner">
+            <div class="car-top">
+              <div>
+                <div class="car-who">适合：已决心转店，但自己不会写，写了没人看</div>
+                <div class="car-title">挂出去半个月没人理？别让房租替你交学费</div>
+              </div>
+              <div class="car-price">¥199<small>/次 快速止损</small></div>
+            </div>
+            <div class="car-tag">1v1价值塑造 · 核对清单确无遗漏 · 一次性交付3版双平台文案</div>
+            <p class="car-copy">想赶紧把店转出去快速止损，但发了转让信息没人理？房租又交半个月。柚子会通过1v1的线上沟通，帮你榨干店铺最后的剩余价值。一次性交付3版双平台文案（小红书/闲鱼），你照发就行。越早转出，越快止损，不然每天醒来都是成本。</p>
+            <a class="car-cta" href="#"><svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#2DC100" d="M18 8C10.8 8 5 13.1 5 19.4c0 3.9 2.2 7.3 5.6 9.5L9 32l4.6-2.4c1.5.4 3.1.7 4.8.7.4 0 .8 0 1.2-.1-.3-.9-.5-1.8-.5-2.8 0-6.1 5.6-11 12.5-11 .4 0 .9 0 1.3.1C31.9 12.4 25.9 8 18 8Zm-5 9.2a1.6 1.6 0 110-3.2 1.6 1.6 0 010 3.2Zm10 0a1.6 1.6 0 110-3.2 1.6 1.6 0 010 3.2Z"/><path fill="#2DC100" d="M43 29.6c0-5.4-5-9.8-11.2-9.8-6.3 0-11.4 4.4-11.4 9.8 0 5.4 5.1 9.8 11.4 9.8 1.4 0 2.7-.2 3.9-.6L38 40l-1-2.4c3-.1 5.3-1.9 6.8-4 .2-.2.3-.5.4-.7.2-.5.3-1 .3-1.3Zm-15.1-2.4a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6Zm7.7 0a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6Z"/></svg>加<b>youziye68</b> 预约</a>
+          </div>
+        </div>
+
+      </div>
+      <div class="car-arrows">
+        <button onclick="carGo(-1)">‹</button>
+        <button onclick="carGo(1)">›</button>
+      </div>
+    </div>
+    <div class="car-dots" id="carDots"></div>
+  </div>
+
+  <footer>本工具为经验估算，内置拼豆店行业基准，结合你的个人预期，仅供参考，不构成经营决策唯一依据。</footer>
+
+  <div class="footer-links">
+    <a href="https://www.xiaohongshu.com/user/profile/5dd0a66d0000000001000c4a" target="_blank" rel="noopener">📕 柚子的小红书主页</a>
+  </div>
+</div>
+
+<!-- 隐藏的说明文案：点击小字备注时弹窗显示 -->
+<div id="noteData" style="display:none">
+  <div id="note-lines">
+    <h4>📖 这两条线是怎么算出来的？</h4>
+    <p><b>回本线（灰色虚线 · 0）</b>：就是"累计盈亏 = 0"这条横线。开局你就先亏掉了<b>初始总投入</b>（转让费+装修+设备+库存+押金），所以第 0 个月累计是负的；之后每个月把<b>当月净盈亏</b>往上累加，曲线一旦爬过 0，就代表本钱收回了（即回本）。爬得越高，赚得越多。</p>
+    <p><b>你的止损线（红色虚线 · −¥最大可亏损）</b>：这条线<b>不是公式算出来的，是你自己填的</b>。你在②里填的"可接受最大亏损"是多少，红线就画在 −那个数。累计盈亏一旦跌到这条线，说明已经亏到你定的忍耐上限，工具就会提示止损。它和"亏完本金"无关——本金可能还没亏完，但按你的心理价位已经该停了。</p>
+    <p><b>期望轨迹（绿色虚线）</b>：假设你每月刚好赚到"期望月盈利"时，累计会怎么走。用来和实际的橙色线对照——两者差得越远，说明你的店越没达到你愿意继续干的标准。</p>
+  </div>
+  <div id="note-industry">
+    <h4>📊 行业参考</h4>
+    <p>拼豆店正常毛利率约 <b>60–70%</b>，价格战后常被压到 <b>40–50%</b>。本工具聚焦"你的个人预期"，数字来自你填的实际经营记录，行业基准仅作参照，不构成经营决策唯一依据。</p>
+  </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal" id="modal">
+  <div class="modal-mask" onclick="closeModal()"></div>
+  <div class="modal-box">
+    <button class="modal-close" type="button" onclick="closeModal()" aria-label="关闭">×</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const BENCH={marginLow:0.4, marginHigh:0.7};
+
+function num(id){ const v=parseFloat(document.getElementById(id).value); return isNaN(v)||v<0?0:v; }
+function fmt(n){ return Math.round(n).toLocaleString('zh-CN'); }
+function money(n){ const s=n<0?'-':''; return s+'¥'+fmt(Math.abs(n)); }
+function short(v){ const a=Math.abs(v); if(a<1000) return (v<0?'-':'')+'¥'+Math.round(a); return (v<0?'-':'')+'¥'+(a/1000).toFixed(0)+'k'; }
+
+function openModal(key){
+  const src=document.getElementById('note-'+key);
+  if(!src) return;
+  document.getElementById('modal-body').innerHTML=src.innerHTML;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+function updateSums(){
+  const init=num('i_transfer')+num('i_deco')+num('i_equip')+num('i_stock')+num('i_deposit');
+  document.getElementById('sum_initial').textContent=fmt(init);
+}
+['i_transfer','i_deco','i_equip','i_stock','i_deposit'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{updateSums();calc();});
+});
+document.getElementById('i_reserve').addEventListener('input',calc);
+document.getElementById('wage').addEventListener('input',calc);
+document.getElementById('hours').addEventListener('input',calc);
+
+document.getElementById('expected').addEventListener('input',calc);
+document.getElementById('maxloss').addEventListener('input',calc);
+
+// 动态月份行
+const EXAMPLE=[-2000,3000,5000,6000,5000,6000];
+function buildMonths(){
+  const list=document.getElementById('monthList'); list.innerHTML='';
+  EXAMPLE.forEach((v,i)=>list.appendChild(makeRow(v,i+1)));
+}
+function makeRow(v,idx){
+  const row=document.createElement('div'); row.className='month-row';
+  row.innerHTML=`<span class="m-label">第${idx}月</span><input type="number" value="${v}" oninput="calc()"><button class="m-del" onclick="delMonth(this)">×</button>`;
+  return row;
+}
+function addMonth(){
+  const list=document.getElementById('monthList');
+  list.appendChild(makeRow(0,list.children.length+1));
+  calc();
+}
+function delMonth(btn){
+  const list=document.getElementById('monthList');
+  if(list.children.length>1){ btn.parentElement.remove(); renumber(); calc(); }
+}
+function renumber(){ [...document.querySelectorAll('#monthList .month-row')].forEach((r,i)=>r.querySelector('.m-label').textContent='第'+(i+1)+'月'); }
+function getMonths(){ return [...document.querySelectorAll('#monthList .month-row input')].map(inp=>parseFloat(inp.value)||0); }
+
+let CHART={};
+function calc(){
+  updateSums();
+  const init=num('i_transfer')+num('i_deco')+num('i_equip')+num('i_stock')+num('i_deposit');
+  const reserve=num('i_reserve');
+  const expected=num('expected');
+  const maxLoss=num('maxloss');
+  const wage=num('wage');
+  const hours=num('hours');
+  const months=getMonths();
+  const M=months.length;
+  const sumActual=months.reduce((a,b)=>a+b,0);
+  const avg=M?sumActual/M:0;
+  const met=months.filter(v=>v>=expected).length;
+  const cum0=-init;
+  const cumEnd=cum0+sumActual;
+
+  // 投影：用最近3个月均值往后推到24月
+  const projN=24;
+  const recent=months.slice(-3);
+  const fwd=recent.length?recent.reduce((a,b)=>a+b,0)/recent.length:avg;
+  const cum=[cum0];
+  for(let m=1;m<=M;m++) cum.push(cum[m-1]+months[m-1]);
+  for(let m=M+1;m<=projN;m++) cum.push(cum[m-1]+fwd);
+  const expectedCum=[]; for(let m=0;m<=projN;m++) expectedCum.push(cum0+expected*m);
+
+  // 回报视角
+  const paybackRemain = (avg>0 && cumEnd<0) ? (-cumEnd)/avg : null;
+  const oc = wage*M + init*0.03/12*M;       // 机会成本：打工工资 + 资金理财≈3%
+  const trueRet = cumEnd - oc;
+  const hourly = hours>0 ? avg/hours : null;
+
+  // 数字卡
+  setStat('o_cum',money(cumEnd),cumEnd>=0?'pos':'neg');
+  setStat('o_avg',money(avg),avg>=0?'pos':(avg>=expected*0.7?'mid':'neg'));
+  document.getElementById('o_met').textContent=met+' / '+M;
+  document.getElementById('k_four').textContent = cumEnd>=0?'已回本':'回本还需';
+  if(cumEnd>=0) setStat('o_four',money(cumEnd),'pos');
+  else if(paybackRemain!=null) setStat('o_four',paybackRemain.toFixed(1)+' 月','mid');
+  else setStat('o_four','难回本','neg');
+
+  // 判断
+  const vd=verdict({avg,expected,met,M,cumEnd,maxLoss,hourly});
+  const ve=document.getElementById('verdict'); ve.className='verdict '+vd.cls;
+  document.getElementById('v_title').textContent=vd.title;
+  document.getElementById('v_text').textContent=vd.text;
+
+  // 复盘报告
+  buildReport({init,reserve,expected,maxLoss,wage,hours,M,avg,met,cumEnd,paybackRemain,oc,trueRet,hourly});
+
+  // 行业基准提示：已移至复盘区右下角小字备注，点击弹窗显示（见 note-industry）
+
+  drawChart({cum,expectedCum,projN,init,maxLoss,M,expected});
+}
+
+function setStat(id,txt,cls){ const el=document.getElementById(id); el.textContent=txt; el.className='v'+(cls?(' '+cls):''); }
+
+function verdict(d){
+  const ratio=d.expected>0?d.avg/d.expected:1;
+  let cls,title,text;
+  if(d.maxLoss>0 && d.cumEnd <= -d.maxLoss){
+    cls='stop';
+    title='🔴 已跌破你的止损线，建议止损';
+    text=`累计已亏 ${money(-d.cumEnd)}，超过你设定的最大可亏 ${money(d.maxLoss)}。按你自己的标准，忍耐已到上限——再撑下去大概率是更大的窟窿。`;
+  } else if(d.avg >= d.expected){
+    if(d.cumEnd>=0){ cls='grow';
+      title='✅ 持续达到你的期望，可继续经营';
+      text=`平均月赚 ${money(d.avg)}，达到你期望的 ${money(d.expected)}；累计已回本 ${money(d.cumEnd)}。重点是稳定增长与复购，不用急着变方向。`;
+    } else { cls='grow';
+      title='✅ 月赚达标但还没回本，符合预期可继续';
+      text=`平均月赚 ${money(d.avg)} ≥ 你期望的 ${money(d.expected)}，只是前期投入还没收回（累计 ${money(d.cumEnd)}）。按你的标准这是"在预期内"，继续并加速回本即可。`;
+    }
+  } else {
+    if(d.cumEnd>=0 && d.avg < d.expected){ cls='save';
+      title='🟠 已回本但未达预期，可考虑"见好就收"';
+      text=`虽已回本（累计 ${money(d.cumEnd)}），但月赚 ${money(d.avg)} 未达你期望的 ${money(d.expected)}。按你的标准，可以见好就收、把本金和时间释放出来，或换更高回报的方向——回本不等于满意。`;
+    } else if(ratio >= 0.7 && d.cumEnd > -d.maxLoss*0.85){ cls='save';
+      title='🟠 未达预期但仍在可控范围，值得优化自救';
+      text=`平均月赚 ${money(d.avg)}，是你期望的 ${Math.round(ratio*100)}%，还没破你的止损线。这类店最该用最小成本测一两个引流/提毛利的活动（正是"自救测试工具包"帮做的事）。`;
+    } else { cls='stop';
+      title='🔴 持续不达标，建议止损或转型';
+      text=`平均月赚 ${money(d.avg)}，仅为期望的 ${Math.round(ratio*100)}%，且累计 ${money(d.cumEnd)}。离你的标准差距大，继续多是沉没成本。`;
+    }
+  }
+  return {cls,title,text};
+}
+
+function buildReport(s){
+  const diff=s.cumEnd+s.maxLoss; // 距止损线
+  let diffTxt = diff>=0 ? `还差 ${money(diff)} 才到止损线（安全区）` : `已超止损线 ${money(-diff)}`;
+  let pb = s.cumEnd>=0 ? `已回本，多赚 ${money(s.cumEnd)}` : (s.paybackRemain!=null ? `回本还要约 ${s.paybackRemain.toFixed(1)} 个月` : `当前月均为负，按现状难回本`);
+  let trueRetTxt = s.trueRet>=0 ? `真实净回报约 ${money(s.trueRet)}` : `真实净回报约 -${money(-s.trueRet)}（已扣机会成本）`;
+  let hr = s.hourly!=null ? `¥${s.hourly.toFixed(1)}` : '—';
+  const html=`
+    <div class="step"><b>1. 投入盘点</b>：初始投入 <b>${money(s.init)}</b>（含备用金 ${money(s.reserve)}）。这是你压在这家店上的总本金。</div>
+    <div class="step"><b>2. 期望对照</b>：你期望每月净赚 <b>${money(s.expected)}</b>；实际平均 <b>${money(s.avg)}</b>。达到你期望的月份有 <b>${s.met}/${s.M}</b> 个月。</div>
+    <div class="step"><b>3. 盈亏盘点</b>：累计 <b>${money(s.cumEnd)}</b>。回本线 = 0，你的止损线 = −${money(s.maxLoss)}；目前 ${diffTxt}。</div>
+    <div class="step"><b>4. 回报视角</b>：${pb}。考虑机会成本（打工 ${money(s.wage)}/月 + 资金理财≈3%）后，${trueRetTxt}；按每月 ${s.hours} 小时算，时薪约 <b>${hr}</b>。</div>
+    <div class="step"><b>5. 结论</b>：见上方建议框。关键不是"赚没赚"，而是"达没达到你愿意继续干的标准"。</div>`;
+  document.getElementById('report').innerHTML=html;
+}
+
+function drawChart(st){
+  const {cum,expectedCum,projN,init,maxLoss,M,expected}=st;
+  const W=640,H=300,padL=58,padR=18,padT=18,padB=30;
+  const all=cum.concat(expectedCum);
+  let yMin=Math.min(0,...all), yMax=Math.max(0,...all);
+  const pad=(yMax-yMin)*0.08||1000; yMin-=pad; yMax+=pad;
+  const xOf=m=>padL+(W-padL-padR)*(m/projN);
+  const yOf=v=>padT+(H-padT-padB)*(1-(v-yMin)/(yMax-yMin));
+  CHART={cum,expectedCum,xOf,yOf,projN,M,expected,W,H,padL,padR,padT,padB};
+
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" xmlns="http://www.w3.org/2000/svg">`;
+  if(maxLoss>0){
+    s+=`<rect x="${padL}" y="${yOf(-maxLoss)}" width="${W-padL-padR}" height="${H-padT-padB-yOf(-maxLoss)}" fill="#FCEBEB" opacity="0.5"/>`;
+  }
+  s+=`<rect x="${padL}" y="${padT}" width="${W-padL-padR}" height="${yOf(0)-padT}" fill="#EAF3DE" opacity="0.45"/>`;
+
+  s+=`<line x1="${padL}" y1="${yOf(0)}" x2="${W-padR}" y2="${yOf(0)}" stroke="#9A8C7A" stroke-width="1" stroke-dasharray="4 3"/>`;
+  s+=`<text x="${padL-6}" y="${yOf(0)-4}" font-size="10" fill="#9A8C7A" text-anchor="end">回本线 0</text>`;
+  if(maxLoss>0){
+    s+=`<line x1="${padL}" y1="${yOf(-maxLoss)}" x2="${W-padR}" y2="${yOf(-maxLoss)}" stroke="#A32D2D" stroke-width="1" stroke-dasharray="4 3"/>`;
+    s+=`<text x="${padL-6}" y="${yOf(-maxLoss)-4}" font-size="10" fill="#A32D2D" text-anchor="end">你的止损线 -${short(maxLoss)}</text>`;
+  }
+  let ep=''; for(let m=0;m<=projN;m++) ep+=`${xOf(m).toFixed(1)},${yOf(expectedCum[m]).toFixed(1)} `;
+  s+=`<polyline points="${ep.trim()}" fill="none" stroke="#639922" stroke-width="1.5" stroke-dasharray="2 4"/>`;
+  let ap=''; for(let m=0;m<=projN;m++) ap+=`${xOf(m).toFixed(1)},${yOf(cum[m]).toFixed(1)} `;
+  s+=`<polyline id="actualLine" points="${ap.trim()}" fill="none" stroke="#F39E35" stroke-width="2.5" stroke-linejoin="round"/>`;
+  for(let m=1;m<=M;m++) s+=`<circle cx="${xOf(m).toFixed(1)}" cy="${yOf(cum[m]).toFixed(1)}" r="3" fill="#BA7517"/>`;
+  for(let m=0;m<=projN;m+=3) s+=`<text x="${xOf(m).toFixed(1)}" y="${H-8}" font-size="10" fill="#9A8C7A" text-anchor="middle">${m}月</text>`;
+  s+=`<text x="${padL-6}" y="${yOf(yMax)+3}" font-size="10" fill="#9A8C7A" text-anchor="end">${short(yMax)}</text>`;
+  s+=`<text x="${padL-6}" y="${yOf(yMin)+3}" font-size="10" fill="#9A8C7A" text-anchor="end">${short(yMin)}</text>`;
+  s+=`<line id="guide" x1="0" y1="${padT}" x2="0" y2="${H-padB}" stroke="#BA7517" stroke-width="1" opacity="0"/>`;
+  s+=`</svg>`;
+  document.getElementById('chart').innerHTML=s;
+
+  const line=document.getElementById('actualLine');
+  const len=line.getTotalLength();
+  line.style.strokeDasharray=len; line.style.strokeDashoffset=len;
+  line.getBoundingClientRect();
+  line.style.transition='stroke-dashoffset .8s ease'; line.style.strokeDashoffset=0;
+}
+
+document.getElementById('chartWrap').addEventListener('mousemove',e=>{
+  if(!CHART.cum) return;
+  const chartEl=document.getElementById('chart');
+  const rect=chartEl.getBoundingClientRect();
+  const xRel=(e.clientX-rect.left)/rect.width*CHART.W;
+  let m=Math.round((xRel-CHART.padL)/(CHART.W-CHART.padL-CHART.padR)*CHART.projN);
+  m=Math.max(0,Math.min(CHART.projN,m));
+  const x=CHART.xOf(m), y=CHART.yOf(CHART.cum[m]);
+  const monthly = m===0? null : CHART.cum[m]-CHART.cum[m-1];
+  const g=document.getElementById('guide'); if(g){ g.setAttribute('x1',x); g.setAttribute('x2',x); g.setAttribute('opacity','0.6'); }
+  let html=`<b>第 ${m} 月</b>`;
+  if(m===0) html+='<br>投入期初';
+  else html+=`<br>本月盈亏：${money(monthly)}<br>累计：${money(CHART.cum[m])}<br>期望月：${money(CHART.expected)}`;
+  const tip=document.getElementById('tip'); tip.innerHTML=html;
+  const wrap=document.getElementById('chartWrap').getBoundingClientRect();
+  let tx=e.clientX-wrap.left+14, ty=e.clientY-wrap.top+14;
+  if(tx+150>wrap.width) tx=tx-168;
+  if(ty+78>wrap.height) ty=ty-86;
+  tip.style.left=tx+'px'; tip.style.top=ty+'px'; tip.style.opacity='1';
+});
+document.getElementById('chartWrap').addEventListener('mouseleave',()=>{
+  document.getElementById('tip').style.opacity='0';
+  const g=document.getElementById('guide'); if(g) g.setAttribute('opacity','0');
+});
+
+buildMonths();
+calc();
+</script>
+
+<script>
+/* ===== 产品轮播图（独立脚本，避免被上方计算器逻辑异常中断） ===== */
+(function(){
+  const track=document.getElementById('carTrack');
+  const slides=[...track.children];
+  const dotsBox=document.getElementById('carDots');
+  let cur=0, timer=null;
+  slides.forEach((s,i)=>{
+    const d=document.createElement('span');
+    d.className='d'+(i===0?' on':'');
+    d.onclick=()=>go(i);
+    dotsBox.appendChild(d);
+  });
+  function render(){
+    slides.forEach((s,i)=>s.classList.toggle('is-active',i===cur));
+    [...dotsBox.children].forEach((d,i)=>d.classList.toggle('on',i===cur));
+  }
+  function go(i){ cur=(i+slides.length)%slides.length; render(); restart(); }
+  function next(){ cur=(cur+1)%slides.length; render(); }
+  function restart(){ clearInterval(timer); timer=setInterval(next,4500); }
+  window.carGo=function(step){ go(cur+step); };
+  render(); restart();
+  // 鼠标悬停时暂停自动播放，移开恢复
+  const carouselEl=document.querySelector('.carousel');
+  if(carouselEl){
+    carouselEl.addEventListener('mouseenter',()=>clearInterval(timer));
+    carouselEl.addEventListener('mouseleave',()=>restart());
+  }
+})();
+</script>
+</body>
+</html>
